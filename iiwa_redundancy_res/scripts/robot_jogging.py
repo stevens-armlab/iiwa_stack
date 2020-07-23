@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import argparse
+import sys
 import rospy
 import actionlib
 from control_msgs.msg import FollowJointTrajectoryActionFeedback, FollowJointTrajectoryActionResult, \
@@ -9,6 +9,7 @@ import moveit_commander
 import moveit_msgs.msg
 import numpy as np
 
+# To run, call: rosrun iiwa_redundancy_res robot_jogging.py __ns::=iiwa _q:=45 _a:=-2000 _i:=1  
 
 def jog(vx, vy, vz, ang_x, ang_y, ang_z, action_client):
     desired_twist = np.array([vx, vy, vz, ang_x, ang_y, ang_z])
@@ -97,24 +98,17 @@ def redundancy_resolution(q_i_change, q_index, alpha_scale, action_client):
 
 
 if __name__ == '__main__':
-    # parsing input arguments
-    parser = argparse.ArgumentParser(description='Redundancy Resolution')
-    parser.add_argument('-q','--q_angle_change', default=-90.0,
-        metavar='[degrees]', type=float,help='desired joint angle change in degrees')
-    parser.add_argument('-i','--index', default=1,
-        metavar='[ith joint]', type=int,
-        help='which joint to set the desired angle (starting from 1st)')
-    parser.add_argument('-a','--alpha', default=-0.5,
-        metavar='[value]', type=float,help='stepsize scaling parameter alpha')
-    args = parser.parse_args()
-    q_angle_change_rad = args.q_angle_change/180.0*np.pi
-    q_index = args.index
-    alpha = -abs(args.alpha)
-
-    moveit_commander.roscpp_initialize('')
+    moveit_commander.roscpp_initialize(sys.argv)
     rospy.init_node('robot_jogging')
 
-    client = actionlib.SimpleActionClient('/iiwa/PositionJointInterface_trajectory_controller/follow_joint_trajectory',
+    q_angle_change = rospy.get_param("~q", -90.0)
+    q_index = rospy.get_param("~i", 1)
+    alpha = -abs(rospy.get_param("~a", -0.5))
+
+    q_angle_change_rad = q_angle_change/180.0*np.pi
+
+
+    client = actionlib.SimpleActionClient('PositionJointInterface_trajectory_controller/follow_joint_trajectory',
                                           FollowJointTrajectoryAction)
     client.wait_for_server()
 
