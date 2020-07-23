@@ -9,7 +9,7 @@ import moveit_commander
 import moveit_msgs.msg
 import numpy as np
 
-# To run, call: rosrun iiwa_redundancy_res robot_jogging.py __ns::=iiwa _q:=45 _a:=-2000 _i:=1  
+# To run, call: rosrun iiwa_redundancy_res robot_jogging.py __ns:=iiwa _q:=45 _a:=-2 _i:=1  
 
 def jog(vx, vy, vz, ang_x, ang_y, ang_z, action_client):
     desired_twist = np.array([vx, vy, vz, ang_x, ang_y, ang_z])
